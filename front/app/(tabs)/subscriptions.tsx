@@ -1,10 +1,10 @@
 import { useCallback, useMemo, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
-import { Pill } from '@/components/ui/screen';
 import { EmptyState, Sheet } from '@/components/ui/sheet';
 import { Text } from '@/components/ui/text';
 import { SubscriptionForm } from '@/components/entity-form';
@@ -87,31 +87,33 @@ export default function SubscriptionsScreen() {
     const recentRenewals = renewalMap.get(sub.id)?.join('、');
     return (
       <Card className="mb-3">
-        <View className="flex-row justify-between gap-4">
-          <View className="flex-1">
-            <Text className="text-xl font-black text-slate-950">{sub.icon || '💳'} {sub.name}</Text>
-            <Text className="mt-1 text-slate-500">{cycleLabel[sub.billingCycle]} · {categoryName(sub.categoryId)} · 下次付款 {sub.nextPaymentDate}</Text>
+        <CardContent className="gap-4">
+          <View className="flex-row justify-between gap-4">
+            <View className="flex-1 gap-1">
+              <Text variant="h4">{sub.icon || '💳'} {sub.name}</Text>
+              <Text variant="muted">{cycleLabel[sub.billingCycle]} · {categoryName(sub.categoryId)} · 下次付款 {sub.nextPaymentDate}</Text>
+            </View>
+            <View className="items-end gap-2">
+              <Text className="font-semibold">{money(sub.price, sub.currency)}</Text>
+              <Badge variant={sub.status !== 'active' ? 'secondary' : days <= sub.notifyDaysBefore ? 'destructive' : 'outline'}>
+                <Text>{sub.status !== 'active' ? statusLabel[sub.status] : days < 0 ? `已过期 ${Math.abs(days)} 天` : `${days} 天后`}</Text>
+              </Badge>
+            </View>
           </View>
-          <View className="items-end">
-            <Text className="text-lg font-black text-slate-950">{money(sub.price, sub.currency)}</Text>
-            <Pill className={sub.status !== 'active' ? 'bg-slate-100 text-slate-600' : days <= sub.notifyDaysBefore ? 'bg-rose-50 text-rose-700' : 'bg-blue-50 text-blue-700'}>
-              {sub.status !== 'active' ? statusLabel[sub.status] : days < 0 ? `已过期 ${Math.abs(days)} 天` : `${days} 天后`}
-            </Pill>
+          <Text variant="muted">折算月支出 {money(monthlyCost(sub.price, sub.billingCycle), sub.currency)} · {sub.autoRenew ? '自动续费' : '手动确认'} · 提前 {sub.notifyDaysBefore} 天提醒</Text>
+          <Text variant="muted">付款方式：{sub.paymentMethod || '未记录'}{recentRenewals ? ` · 最近续费 ${recentRenewals}` : ''}</Text>
+          <View className="flex-row flex-wrap gap-2">
+            <Button size="sm" variant="default" onPress={() => renewSubscription(sub)}><Text>已续费</Text></Button>
+            <Button size="sm" variant="secondary" onPress={() => openEditForm(sub)}><Text>编辑</Text></Button>
+            <Button
+              size="sm"
+              variant="destructive"
+              onPress={() => confirmAction('删除订阅', `确定删除 ${sub.name}？`, () => removeSubscription(sub.id))}
+            >
+              <Text>删除</Text>
+            </Button>
           </View>
-        </View>
-        <Text className="mt-3 text-sm text-slate-500">折算月支出 {money(monthlyCost(sub.price, sub.billingCycle), sub.currency)} · {sub.autoRenew ? '自动续费' : '手动确认'} · 提前 {sub.notifyDaysBefore} 天提醒</Text>
-        <Text className="mt-2 text-sm text-slate-400">付款方式：{sub.paymentMethod || '未记录'}{recentRenewals ? ` · 最近续费 ${recentRenewals}` : ''}</Text>
-        <View className="mt-4 flex-row gap-2">
-          <Button size="sm" variant="default" onPress={() => renewSubscription(sub)}><Text>已续费</Text></Button>
-          <Button size="sm" variant="secondary" onPress={() => openEditForm(sub)}><Text>编辑</Text></Button>
-          <Button
-            size="sm"
-            variant="destructive"
-            onPress={() => confirmAction('删除订阅', `确定删除 ${sub.name}？`, () => removeSubscription(sub.id))}
-          >
-            <Text>删除</Text>
-          </Button>
-        </View>
+        </CardContent>
       </Card>
     );
   }, [categoryName, openEditForm, removeSubscription, renewalMap, renewSubscription]);
@@ -121,28 +123,30 @@ export default function SubscriptionsScreen() {
       <View className="mb-5">
         <View className="flex-row items-start justify-between gap-3">
           <View className="flex-1">
-            <Text className="text-3xl font-black text-slate-950">订阅管理</Text>
-            <Text className="mt-1 text-base text-slate-500">筛选结果 {filteredSubscriptions.length} 项 · 月支出 {money(totalMonthly)}</Text>
+            <Text variant="h2" className="border-b-0 pb-0">订阅管理</Text>
+            <Text variant="muted" className="mt-1">筛选结果 {filteredSubscriptions.length} 项 · 月支出 {money(totalMonthly)}</Text>
           </View>
           <Button size="sm" onPress={openCreateForm}><Text>新增</Text></Button>
         </View>
       </View>
-      <Card className="mb-4 gap-3">
-        <Input placeholder="搜索订阅名称或备注" value={query} onChangeText={setQuery} />
-        <View className="flex-row flex-wrap gap-2">
-          <Button size="sm" variant={!categoryFilter ? 'default' : 'secondary'} onPress={() => setCategoryFilter(undefined)}><Text>全部</Text></Button>
-          {categories.map((category) => (
-            <Button key={category.id} size="sm" variant={categoryFilter === category.id ? 'default' : 'secondary'} onPress={() => setCategoryFilter(category.id)}>
-              <Text>{category.name}</Text>
-            </Button>
-          ))}
-        </View>
+      <Card className="mb-4">
+        <CardContent className="gap-3">
+          <Input placeholder="搜索订阅名称或备注" value={query} onChangeText={setQuery} />
+          <View className="flex-row flex-wrap gap-2">
+            <Button size="sm" variant={!categoryFilter ? 'default' : 'secondary'} onPress={() => setCategoryFilter(undefined)}><Text>全部</Text></Button>
+            {categories.map((category) => (
+              <Button key={category.id} size="sm" variant={categoryFilter === category.id ? 'default' : 'secondary'} onPress={() => setCategoryFilter(category.id)}>
+                <Text>{category.name}</Text>
+              </Button>
+            ))}
+          </View>
+        </CardContent>
       </Card>
     </View>
   ), [categories, categoryFilter, filteredSubscriptions.length, openCreateForm, query, totalMonthly]);
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-950" edges={['top']}>
+    <SafeAreaView className="bg-background flex-1" edges={['top']}>
       <FlatList
         data={filteredSubscriptions}
         keyExtractor={(item) => item.id}

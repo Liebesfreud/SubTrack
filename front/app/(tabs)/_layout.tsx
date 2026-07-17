@@ -1,41 +1,24 @@
 import { Tabs } from 'expo-router';
 import { BarChart3, Boxes, CreditCard, Settings } from 'lucide-react-native';
 import { useColorScheme } from 'nativewind';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
+import { THEME } from '@/lib/theme';
 
 export default function TabsLayout() {
   const { colorScheme } = useColorScheme();
-  const insets = useSafeAreaInsets();
   const isDark = colorScheme === 'dark';
-  const dockBottom = Math.max(14, insets.bottom + 8);
+  const theme = THEME[isDark ? 'dark' : 'light'];
   return (
     <Tabs
       screenOptions={{
         headerShown: false,
-        tabBarActiveTintColor: '#2563EB',
-        tabBarInactiveTintColor: isDark ? '#64748B' : '#94A3B8',
+        tabBarActiveTintColor: theme.foreground,
+        tabBarInactiveTintColor: theme.mutedForeground,
         tabBarStyle: {
-          position: 'absolute',
-          left: 16,
-          right: 16,
-          bottom: dockBottom,
-          height: 64,
-          paddingBottom: 8,
-          paddingTop: 8,
-          borderTopColor: isDark ? '#1E293B' : '#E2E8F0',
+          borderTopColor: theme.border,
           borderTopWidth: 1,
-          borderWidth: 1,
-          borderColor: isDark ? '#1E293B' : '#E2E8F0',
-          borderRadius: 28,
-          backgroundColor: isDark ? '#020617' : '#FFFFFF',
-          shadowColor: '#0F172A',
-          shadowOpacity: isDark ? 0.3 : 0.12,
-          shadowRadius: 18,
-          shadowOffset: { width: 0, height: 8 },
-          elevation: 12,
+          backgroundColor: theme.background,
         },
-        tabBarLabelStyle: { fontSize: 12, fontWeight: '700' },
-        tabBarItemStyle: { borderRadius: 22, marginHorizontal: 4 },
+        tabBarLabelStyle: { fontSize: 12, fontWeight: '500' },
       }}
     >
       <Tabs.Screen name="index" options={{ title: '概览', tabBarAccessibilityLabel: '打开概览页', tabBarIcon: ({ color, size }) => <BarChart3 color={color} size={size} /> }} />

@@ -1,23 +1,29 @@
-import { View } from 'react-native';
-import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent } from '@/components/ui/card';
 import { Text } from '@/components/ui/text';
-import { cn } from '@/lib/utils';
+
+const variants = {
+  blue: 'default',
+  green: 'secondary',
+  amber: 'outline',
+  rose: 'destructive',
+} as const;
 
 const tones = {
-  blue: 'bg-blue-50 text-blue-700',
-  green: 'bg-emerald-50 text-emerald-700',
-  amber: 'bg-amber-50 text-amber-700',
-  rose: 'bg-rose-50 text-rose-700',
+  blue: true,
+  green: true,
+  amber: true,
+  rose: true,
 };
 
 export function MetricCard({ title, value, caption, tone = 'blue' }: { title: string; value: string; caption: string; tone?: keyof typeof tones }) {
   return (
     <Card className="flex-1 min-w-[46%]">
-      <Text className="text-sm font-medium text-slate-500 dark:text-slate-400">{title}</Text>
-      <Text className="mt-2 text-2xl font-black text-slate-950 dark:text-slate-50">{value}</Text>
-      <View className={cn('mt-3 self-start rounded-full px-3 py-1', tones[tone].split(' ')[0])}>
-        <Text className={cn('text-xs font-semibold', tones[tone].split(' ')[1])}>{caption}</Text>
-      </View>
+      <CardContent className="gap-3">
+        <Text variant="muted">{title}</Text>
+        <Text variant="h3">{value}</Text>
+        <Badge variant={variants[tone]} className="self-start"><Text>{caption}</Text></Badge>
+      </CardContent>
     </Card>
   );
 }

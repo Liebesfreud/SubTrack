@@ -214,7 +214,7 @@ export function ItemForm({
       <Input placeholder="闲置提醒天数" keyboardType="number-pad" value={idleAlertDays} onChangeText={setIdleAlertDays} />
       <Input placeholder="保修截止日期，可选 YYYY-MM-DD" value={warrantyUntil} onChangeText={setWarrantyUntil} />
       <Input placeholder="序列号/资产编号，可选" value={serialNumber} onChangeText={setSerialNumber} />
-      {photoUri ? <Image source={{ uri: photoUri }} className="h-36 w-full rounded-2xl bg-slate-100" resizeMode="cover" /> : null}
+      {photoUri ? <Image source={{ uri: photoUri }} className="bg-muted h-36 w-full rounded-lg" resizeMode="cover" /> : null}
       <View className="flex-row gap-3">
         <Button className="flex-1" variant="secondary" onPress={pickPhoto}><Text>{photoUri ? '更换照片' : '选择照片'}</Text></Button>
         {photoUri ? <Button className="flex-1" variant="ghost" onPress={() => setPhotoUri('')}><Text>移除照片</Text></Button> : null}

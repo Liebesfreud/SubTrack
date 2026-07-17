@@ -7,7 +7,8 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { useColorScheme } from 'nativewind';
 import { PortalHost } from '@rn-primitives/portal';
 import { ThemeProvider } from '@react-navigation/native';
-import { NAV_THEME } from '@/lib/theme';
+import { NAV_THEME, THEME } from '@/lib/theme';
+import { useGeistFont } from '@/hooks/use-geist-font';
 import { useAppStore } from '@/store/app-store';
 
 export default function RootLayout() {
@@ -15,6 +16,7 @@ export default function RootLayout() {
   const ready = useAppStore((state) => state.ready);
   const themeMode = useAppStore((state) => state.settings.themeMode);
   const { colorScheme, setColorScheme } = useColorScheme();
+  const [fontsLoaded, fontError] = useGeistFont();
 
   useEffect(() => {
     initialize().catch((error) => console.error('App init failed', error));
@@ -24,11 +26,11 @@ export default function RootLayout() {
     setColorScheme(themeMode);
   }, [setColorScheme, themeMode]);
 
-  if (!ready) {
+  if (!ready || (!fontsLoaded && !fontError)) {
     return (
       <SafeAreaProvider>
-        <View className="flex-1 items-center justify-center bg-slate-50 dark:bg-slate-950">
-          <ActivityIndicator color="#2563EB" size="large" />
+        <View className="bg-background flex-1 items-center justify-center">
+          <ActivityIndicator color={THEME.light.primary} size="large" />
         </View>
       </SafeAreaProvider>
     );

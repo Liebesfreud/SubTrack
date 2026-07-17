@@ -4,7 +4,7 @@ import * as Notifications from 'expo-notifications';
 import { useState } from 'react';
 import { Alert, Share, View } from 'react-native';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { ChoiceGroup } from '@/components/ui/choice-group';
 import { Input } from '@/components/ui/input';
 import { Screen } from '@/components/ui/screen';
@@ -91,68 +91,74 @@ export default function SettingsScreen() {
 
   return (
     <Screen title="设置" subtitle="本地优先、可导入导出、可申请 Android 通知权限">
-      <Card className="mb-4 gap-3">
-        <Title>偏好设置</Title>
-        <Label>主题模式</Label>
-        <ChoiceGroup values={themeModes} value={settings.themeMode} labels={themeModeLabels} onChange={(themeMode) => updateSettings({ ...settings, themeMode })} />
-        <Label>基础币种</Label>
-        <ChoiceGroup values={currencies} value={settings.baseCurrency} onChange={(baseCurrency) => updateSettings({ ...settings, baseCurrency })} />
-        <Label>月度订阅预算</Label>
-        <Input keyboardType="decimal-pad" value={budget} onChangeText={setBudget} accessibilityLabel="月度订阅预算" />
-        <Label>默认物品闲置提醒天数</Label>
-        <Input keyboardType="number-pad" value={idleDays} onChangeText={setIdleDays} accessibilityLabel="默认物品闲置提醒天数" />
-        <View className="flex-row items-center justify-between rounded-2xl bg-slate-50 p-3 dark:bg-slate-800">
-          <View>
-            <Label className="text-base font-bold text-slate-900 dark:text-slate-100">本地通知</Label>
-            <AppText className="text-sm text-slate-500 dark:text-slate-400">用于续费和闲置提醒</AppText>
+      <Card className="mb-4">
+        <CardContent className="gap-3">
+          <Title>偏好设置</Title>
+          <Label>主题模式</Label>
+          <ChoiceGroup values={themeModes} value={settings.themeMode} labels={themeModeLabels} onChange={(themeMode) => updateSettings({ ...settings, themeMode })} />
+          <Label>基础币种</Label>
+          <ChoiceGroup values={currencies} value={settings.baseCurrency} onChange={(baseCurrency) => updateSettings({ ...settings, baseCurrency })} />
+          <Label>月度订阅预算</Label>
+          <Input keyboardType="decimal-pad" value={budget} onChangeText={setBudget} accessibilityLabel="月度订阅预算" />
+          <Label>默认物品闲置提醒天数</Label>
+          <Input keyboardType="number-pad" value={idleDays} onChangeText={setIdleDays} accessibilityLabel="默认物品闲置提醒天数" />
+          <View className="bg-muted flex-row items-center justify-between rounded-lg p-3">
+            <View>
+              <Label className="text-base">本地通知</Label>
+              <AppText className="text-muted-foreground text-sm">用于续费和闲置提醒</AppText>
+            </View>
+            <Switch checked={settings.notificationEnabled} onCheckedChange={toggleNotifications} accessibilityLabel="开启本地通知" />
           </View>
-          <Switch checked={settings.notificationEnabled} onCheckedChange={toggleNotifications} accessibilityLabel="开启本地通知" />
-        </View>
-        <Button onPress={save}><Text>保存设置</Text></Button>
+          <Button onPress={save}><Text>保存设置</Text></Button>
+        </CardContent>
       </Card>
 
-      <Card className="mb-4 gap-3">
-        <Title>分类管理</Title>
-        <Input placeholder="分类名称，例如 AI 工具 / 厨房用品" value={categoryName} onChangeText={setCategoryName} accessibilityLabel="分类名称" />
-        <ChoiceGroup values={categoryModules} value={categoryModule} labels={categoryModuleLabels} onChange={setCategoryModule} />
-        <View className="flex-row flex-wrap gap-2">
-          {categoryColors.map((color) => (
-            <Button key={color} size="sm" variant={categoryColor === color ? 'default' : 'secondary'} onPress={() => setCategoryColor(color)} accessibilityLabel={`选择分类颜色 ${color}`}>
-              <Text>{color}</Text>
-            </Button>
-          ))}
-        </View>
-        <Button onPress={createCategory}><Text>新增分类</Text></Button>
-        {(['subscription', 'item'] as const).map((module) => (
-          <View key={module} className="gap-2">
-            <Label>{module === 'subscription' ? '订阅分类' : '物品分类'}</Label>
-            {categories.filter((category) => category.module === module).map((category) => (
-              <View key={category.id} className="flex-row items-center justify-between rounded-2xl bg-slate-50 p-3 dark:bg-slate-800">
-                <View className="flex-row items-center gap-2">
-                  <View className="h-3 w-3 rounded-full" style={{ backgroundColor: category.color }} />
-                  <Label className="text-base font-bold text-slate-900 dark:text-slate-100">{category.name}</Label>
-                </View>
-                <Button
-                  size="sm"
-                  variant="ghost"
-                  accessibilityLabel={`删除分类 ${category.name}`}
-                  onPress={() => confirmAction('删除分类', `删除 ${category.name} 后，关联数据会变为未分类。`, () => removeCategory(category.id))}
-                >
-                  <Text>删除</Text>
-                </Button>
-              </View>
+      <Card className="mb-4">
+        <CardContent className="gap-3">
+          <Title>分类管理</Title>
+          <Input placeholder="分类名称，例如 AI 工具 / 厨房用品" value={categoryName} onChangeText={setCategoryName} accessibilityLabel="分类名称" />
+          <ChoiceGroup values={categoryModules} value={categoryModule} labels={categoryModuleLabels} onChange={setCategoryModule} />
+          <View className="flex-row flex-wrap gap-2">
+            {categoryColors.map((color) => (
+              <Button key={color} size="sm" variant={categoryColor === color ? 'default' : 'secondary'} onPress={() => setCategoryColor(color)} accessibilityLabel={`选择分类颜色 ${color}`}>
+                <Text>{color}</Text>
+              </Button>
             ))}
           </View>
-        ))}
+          <Button onPress={createCategory}><Text>新增分类</Text></Button>
+          {(['subscription', 'item'] as const).map((module) => (
+            <View key={module} className="gap-2">
+              <Label>{module === 'subscription' ? '订阅分类' : '物品分类'}</Label>
+              {categories.filter((category) => category.module === module).map((category) => (
+                <View key={category.id} className="bg-muted flex-row items-center justify-between rounded-lg p-3">
+                  <View className="flex-row items-center gap-2">
+                    <View className="h-3 w-3 rounded-full" style={{ backgroundColor: category.color }} />
+                    <Label className="text-base">{category.name}</Label>
+                  </View>
+                  <Button
+                    size="sm"
+                    variant="ghost"
+                    accessibilityLabel={`删除分类 ${category.name}`}
+                    onPress={() => confirmAction('删除分类', `删除 ${category.name} 后，关联数据会变为未分类。`, () => removeCategory(category.id))}
+                  >
+                    <Text>删除</Text>
+                  </Button>
+                </View>
+              ))}
+            </View>
+          ))}
+        </CardContent>
       </Card>
 
-      <Card className="gap-3">
-        <Title>数据安全</Title>
-        <AppText className="text-slate-500 dark:text-slate-400">数据保存在设备本地 SQLite。你可以导出 JSON 做备份，也可以从 JSON 合并恢复。</AppText>
-        <View className="flex-row gap-3">
-          <Button className="flex-1" variant="secondary" onPress={exportData} accessibilityLabel="导出 LifeLedger JSON 备份"><Text>导出</Text></Button>
-          <Button className="flex-1" onPress={importData} accessibilityLabel="导入 LifeLedger JSON 备份"><Text>导入</Text></Button>
-        </View>
+      <Card>
+        <CardContent className="gap-3">
+          <Title>数据安全</Title>
+          <AppText className="text-muted-foreground">数据保存在设备本地 SQLite。你可以导出 JSON 做备份，也可以从 JSON 合并恢复。</AppText>
+          <View className="flex-row gap-3">
+            <Button className="flex-1" variant="secondary" onPress={exportData} accessibilityLabel="导出 LifeLedger JSON 备份"><Text>导出</Text></Button>
+            <Button className="flex-1" onPress={importData} accessibilityLabel="导入 LifeLedger JSON 备份"><Text>导入</Text></Button>
+          </View>
+        </CardContent>
       </Card>
     </Screen>
   );

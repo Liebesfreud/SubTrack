@@ -1,7 +1,7 @@
 import { useMemo } from 'react';
 import { Pressable, View } from 'react-native';
 import { router } from 'expo-router';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { MetricCard } from '@/components/metric-card';
 import { InsightCard, ProgressBar } from '@/components/insight-card';
 import { Screen } from '@/components/ui/screen';
@@ -65,21 +65,23 @@ export default function DashboardScreen() {
 
   return (
     <Screen title="长期生活仪表盘" subtitle="订阅支出、资产使用和长期主义指数一屏掌握">
-      <View className="mb-4 rounded-[32px] bg-slate-950 p-5">
-        <Text className="text-sm font-semibold text-blue-200">Long-term Score</Text>
-        <View className="mt-3 flex-row items-end justify-between">
-          <Text className="text-6xl font-black text-white">{data.longTermScore}</Text>
-          <Text className="mb-2 text-right text-sm leading-5 text-slate-300">预算克制、少闲置、多记录，分数越高</Text>
-        </View>
-        <View className="mt-5 rounded-3xl bg-white/10 p-4">
-          <View className="mb-3 flex-row items-center justify-between">
-            <Text className="font-bold text-white">订阅预算使用率</Text>
-            <Text className="font-black text-white">{Math.round(budgetUsage)}%</Text>
+      <Card className="mb-4">
+        <CardContent className="gap-4">
+          <Text variant="muted">Long-term Score</Text>
+          <View className="flex-row items-end justify-between gap-4">
+            <Text variant="h1" className="text-left">{data.longTermScore}</Text>
+            <Text variant="muted" className="flex-1 text-right leading-5">预算克制、少闲置、多记录，分数越高</Text>
           </View>
+          <View className="bg-muted gap-3 rounded-lg p-4">
+            <View className="flex-row items-center justify-between">
+              <Text className="font-medium">订阅预算使用率</Text>
+              <Text className="font-semibold">{Math.round(budgetUsage)}%</Text>
+            </View>
           <ProgressBar value={budgetUsage} tone={budgetUsage >= 100 ? 'rose' : budgetUsage >= 80 ? 'amber' : 'green'} />
-          <Text className="mt-2 text-xs text-slate-300">{money(data.monthlySpend)} / {money(settings.monthlyBudget)}</Text>
-        </View>
-      </View>
+            <Text variant="muted">{money(data.monthlySpend)} / {money(settings.monthlyBudget)}</Text>
+          </View>
+        </CardContent>
+      </Card>
 
       <View className="mb-4 flex-row flex-wrap gap-3">
         <MetricCard title="本月订阅" value={money(data.monthlySpend)} caption={`预算 ${money(settings.monthlyBudget)}`} tone={budgetUsage >= 100 ? 'rose' : 'blue'} />
@@ -90,7 +92,7 @@ export default function DashboardScreen() {
       </View>
 
       <View className="mb-1">
-        <Text className="mb-3 text-lg font-black text-slate-950 dark:text-slate-50 dark:text-slate-50">今日洞察</Text>
+        <Text variant="h4" className="mb-3">今日洞察</Text>
         {insights.map((insight) => (
           <InsightCard
             key={insight.title}
@@ -105,61 +107,67 @@ export default function DashboardScreen() {
 
       <Pressable onPress={() => router.push('/subscriptions')} className="active:opacity-80" accessibilityRole="button" accessibilityLabel="查看全部即将处理的订阅">
         <Card className="mb-4">
-          <View className="mb-3 flex-row items-center justify-between">
-            <Text className="text-lg font-black text-slate-950 dark:text-slate-50">即将处理的订阅</Text>
-            <Text className="text-sm font-bold text-blue-600">查看全部</Text>
-          </View>
-          {dueSubscriptions.length === 0 ? (
-            <Text className="text-slate-500 dark:text-slate-400">还没有订阅，去添加第一个长期支出。</Text>
-          ) : dueSubscriptions.map((sub) => (
-            <View key={sub.id} className="mb-3 flex-row items-center justify-between last:mb-0">
-              <View>
-                <Text className="font-bold text-slate-900 dark:text-slate-100">{sub.icon || '💳'} {sub.name}</Text>
-                <Text className="text-sm text-slate-500 dark:text-slate-400">{daysUntil(sub.nextPaymentDate)} 天后 · {sub.nextPaymentDate}</Text>
-              </View>
-              <Text className="font-black text-slate-950 dark:text-slate-50">{money(sub.price, sub.currency)}</Text>
+          <CardContent className="gap-3">
+            <View className="flex-row items-center justify-between">
+              <Text variant="h4">即将处理的订阅</Text>
+              <Text variant="small">查看全部</Text>
             </View>
-          ))}
+            {dueSubscriptions.length === 0 ? (
+              <Text variant="muted">还没有订阅，去添加第一个长期支出。</Text>
+            ) : dueSubscriptions.map((sub) => (
+              <View key={sub.id} className="flex-row items-center justify-between gap-3">
+                <View className="flex-1">
+                  <Text className="font-medium">{sub.icon || '💳'} {sub.name}</Text>
+                  <Text variant="muted">{daysUntil(sub.nextPaymentDate)} 天后 · {sub.nextPaymentDate}</Text>
+                </View>
+                <Text className="font-semibold">{money(sub.price, sub.currency)}</Text>
+              </View>
+            ))}
+          </CardContent>
         </Card>
       </Pressable>
 
       <Pressable onPress={() => router.push('/items')} className="active:opacity-80" accessibilityRole="button" accessibilityLabel="查看全部闲置资产">
         <Card className="mb-4">
-          <View className="mb-3 flex-row items-center justify-between">
-            <Text className="text-lg font-black text-slate-950 dark:text-slate-50">闲置资产雷达</Text>
-            <Text className="text-sm font-bold text-blue-600">查看全部</Text>
-          </View>
-          {idleItems.length === 0 ? (
-            <Text className="text-slate-500 dark:text-slate-400">目前没有明显闲置物品，继续保持。</Text>
-          ) : idleItems.map(({ item, idleDays }) => (
-            <View key={item.id} className="mb-3 flex-row items-center justify-between last:mb-0">
-              <View>
-                <Text className="font-bold text-slate-900 dark:text-slate-100">{item.name}</Text>
-                <Text className="text-sm text-slate-500 dark:text-slate-400">{item.location} · 闲置 {idleDays} 天 · 已使用 {item.usageCount} 次</Text>
-              </View>
-              <Text className="font-black text-slate-950 dark:text-slate-50">{money(item.purchasePrice, item.currency)}</Text>
+          <CardContent className="gap-3">
+            <View className="flex-row items-center justify-between">
+              <Text variant="h4">闲置资产雷达</Text>
+              <Text variant="small">查看全部</Text>
             </View>
-          ))}
+            {idleItems.length === 0 ? (
+              <Text variant="muted">目前没有明显闲置物品，继续保持。</Text>
+            ) : idleItems.map(({ item, idleDays }) => (
+              <View key={item.id} className="flex-row items-center justify-between gap-3">
+                <View className="flex-1">
+                  <Text className="font-medium">{item.name}</Text>
+                  <Text variant="muted">{item.location} · 闲置 {idleDays} 天 · 已使用 {item.usageCount} 次</Text>
+                </View>
+                <Text className="font-semibold">{money(item.purchasePrice, item.currency)}</Text>
+              </View>
+            ))}
+          </CardContent>
         </Card>
       </Pressable>
 
       <Pressable onPress={() => router.push('/items')} className="active:opacity-80" accessibilityRole="button" accessibilityLabel="前往物品页记录使用">
         <Card>
-          <View className="mb-3 flex-row items-center justify-between">
-            <Text className="text-lg font-black text-slate-950 dark:text-slate-50">最近使用记录</Text>
-            <Text className="text-sm font-bold text-blue-600">去记录</Text>
-          </View>
-          {recentUsageLogs.length === 0 ? (
-            <Text className="text-slate-500 dark:text-slate-400">还没有使用记录，去物品页点一次“记录使用”。</Text>
-          ) : recentUsageLogs.map((log) => (
-            <View key={log.id} className="mb-3 flex-row items-center justify-between last:mb-0">
-              <View>
-                <Text className="font-bold text-slate-900 dark:text-slate-100">{itemName(log.itemId)}</Text>
-                <Text className="text-sm text-slate-500 dark:text-slate-400">使用日期 {log.usedAt}</Text>
-              </View>
-              <Text className="font-black text-emerald-600">+1</Text>
+          <CardContent className="gap-3">
+            <View className="flex-row items-center justify-between">
+              <Text variant="h4">最近使用记录</Text>
+              <Text variant="small">去记录</Text>
             </View>
-          ))}
+            {recentUsageLogs.length === 0 ? (
+              <Text variant="muted">还没有使用记录，去物品页点一次“记录使用”。</Text>
+            ) : recentUsageLogs.map((log) => (
+              <View key={log.id} className="flex-row items-center justify-between gap-3">
+                <View className="flex-1">
+                  <Text className="font-medium">{itemName(log.itemId)}</Text>
+                  <Text variant="muted">使用日期 {log.usedAt}</Text>
+                </View>
+                <Text className="font-semibold">+1</Text>
+              </View>
+            ))}
+          </CardContent>
         </Card>
       </Pressable>
     </Screen>

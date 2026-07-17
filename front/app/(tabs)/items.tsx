@@ -2,7 +2,7 @@ import { useCallback, useMemo, useState } from 'react';
 import { FlatList, View } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { Button } from '@/components/ui/button';
-import { Card } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { ItemRow } from '@/components/item-row';
 import { Input } from '@/components/ui/input';
 import { ItemForm } from '@/components/entity-form';
@@ -114,29 +114,31 @@ export default function ItemsScreen() {
       <View className="mb-5">
         <View className="flex-row items-start justify-between gap-3">
           <View className="flex-1">
-            <Text className="text-3xl font-black text-slate-950">物品管理</Text>
-            <Text className="mt-1 text-base text-slate-500">筛选结果 {filteredItems.length} 件 · 总投入 {money(totalValue)}</Text>
+            <Text variant="h2" className="border-b-0 pb-0">物品管理</Text>
+            <Text variant="muted" className="mt-1">筛选结果 {filteredItems.length} 件 · 总投入 {money(totalValue)}</Text>
           </View>
           <Button size="sm" onPress={openCreateForm}><Text>新增</Text></Button>
         </View>
       </View>
-      <Card className="mb-4 gap-3">
-        <Input placeholder="搜索物品、位置或备注" value={query} onChangeText={setQuery} />
-        <View className="flex-row flex-wrap gap-2">
-          <Button size="sm" variant={!categoryFilter ? 'default' : 'secondary'} onPress={() => setCategoryFilter(undefined)}><Text>全部</Text></Button>
-          {categories.map((category) => (
-            <Button key={category.id} size="sm" variant={categoryFilter === category.id ? 'default' : 'secondary'} onPress={() => setCategoryFilter(category.id)}>
-              <Text>{category.name}</Text>
-            </Button>
-          ))}
-          <Button size="sm" variant={onlyIdle ? 'default' : 'secondary'} onPress={() => setOnlyIdle((value) => !value)}><Text>只看闲置</Text></Button>
-        </View>
+      <Card className="mb-4">
+        <CardContent className="gap-3">
+          <Input placeholder="搜索物品、位置或备注" value={query} onChangeText={setQuery} />
+          <View className="flex-row flex-wrap gap-2">
+            <Button size="sm" variant={!categoryFilter ? 'default' : 'secondary'} onPress={() => setCategoryFilter(undefined)}><Text>全部</Text></Button>
+            {categories.map((category) => (
+              <Button key={category.id} size="sm" variant={categoryFilter === category.id ? 'default' : 'secondary'} onPress={() => setCategoryFilter(category.id)}>
+                <Text>{category.name}</Text>
+              </Button>
+            ))}
+            <Button size="sm" variant={onlyIdle ? 'default' : 'secondary'} onPress={() => setOnlyIdle((value) => !value)}><Text>只看闲置</Text></Button>
+          </View>
+        </CardContent>
       </Card>
     </View>
   ), [categories, categoryFilter, filteredItems.length, onlyIdle, openCreateForm, query, totalValue]);
 
   return (
-    <SafeAreaView className="flex-1 bg-slate-50 dark:bg-slate-950" edges={['top']}>
+    <SafeAreaView className="bg-background flex-1" edges={['top']}>
       <FlatList
         data={filteredItems}
         keyExtractor={(item) => item.id}
